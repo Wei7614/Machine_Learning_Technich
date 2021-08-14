@@ -34,16 +34,21 @@ def re_weight(weight):
     pass
 
 
-# training挑出e最小的s, threshold, 跟feature
+# training挑出會使e最小的s, threshold, 跟feature
 def training(x_data, y, weight):
     min_e_in = math.inf
     best_s = 0
     best_col = 0
     best_threshold = math.inf * -1
+    # col 為 feature
     for col in range(x_data.shape[1]):
+        # 將某一features打包成list
         features = x_data[:, col:col + 1].tolist()
+        # 因為tolist()出來會是1x1的array，為了提取裡面的值所以再做ㄧ下處理
         features = [value[0] for value in features]
+        # 從feature中建立閥值的list
         thresholds = get_thresholds(features)
+        # 往左走還往右走
         s_s = [-1, 1]
         for threshold in thresholds:
             for s in s_s:
@@ -99,6 +104,7 @@ def main():
     g_s = []
     alphas = []
     # 課程裡面講的u
+    # G = (1/T) * sum_t(u_t * g_t)
     weight = np.ones((x_train.shape[0], 1)) * (1 / x_train.shape[0])
     weight_sum = []
     e_in_min = math.inf
@@ -107,7 +113,7 @@ def main():
         e_in_min = min(e_in_min, e_in)
         weight_sum.append(np.sum(weight))
         g_s.append((best_s, best_col, best_threshold))
-        # 為了要得到發散的 g 所以要有scaling_factor跟optimal_reweighting
+        # 為了要得到發散的 g 所以要有scaling_factor跟optimal_reweighting (adaptive boosting)
         scaling_factor = math.sqrt((1 - e_in) / e_in)
         optimal_reweighting(x_train, y_train, weight, best_threshold, best_s, best_col, scaling_factor)
         alphas.append(math.log(scaling_factor))
